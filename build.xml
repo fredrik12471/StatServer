@@ -1,0 +1,86 @@
+<project name="My Project" default="help" basedir=".">
+  <!-- Define the properties used by the build -->
+  <property name="app.name"      value="ROOT"/>
+  <property name="work.home"    value="${basedir}/work"/>
+  <property name="dist.home"     value="${basedir}/dist"/>
+  <property name="src.home"      value="${basedir}/src"/>
+  <property name="web.home"      value="${basedir}/web"/>
+  <property name="inc.home"      value="${basedir}/include"/>
+  <property name="lib.home"      value="${basedir}/lib"/>
+
+  <target name="help">
+    <echo>You can use the following targets:</echo>
+    <echo> </echo>
+    <echo>  help    : (default) Prints this message </echo>
+    <echo>  all     : Cleans, compiles, and packages application</echo>
+    <echo>  clean   : Deletes work directories</echo>
+    <echo>  compile : Compiles servlets into class files</echo>
+    <echo>  dist    : Packages artifacts into a deployable WAR</echo>
+    <echo></echo>
+    <echo>For example, to clean, compile, and package all at once, run:</echo>
+    <echo>prompt> ant all </echo>
+  </target>
+	
+	  <!-- Define the CLASSPATH -->
+	  <path id="compile.classpath">
+	    <fileset dir="${basedir}/bin">
+	      <include name="*.jar"/>
+	    </fileset>
+	    <pathelement location="${basedir}/lib"/>
+	    <fileset dir="${basedir}/lib">
+	      <include name="*.jar"/>
+	    </fileset>
+	    <!-- fileset dir="C:\Users\efrewan\Desktop\jfw\2014-01-02_Scomer\Tomcat\apache-tomcat-7.0.50\lib" -->
+	    <fileset dir="C:\Program Files\Apache Software Foundation\Tomcat 7.0\lib">
+	        <include name="*.jar"/>
+	    </fileset>
+	  </path>
+
+  <target name="all" depends="clean,compile,dist"
+          description="Clean work dirs, then compile and create a WAR"/>
+
+  <target name="clean"
+          description="Delete old work and dist directories">
+    <delete dir="${work.home}"/>
+    <delete dir="${dist.home}"/>
+  </target>
+
+  <target name="prepare" depends="clean"
+          description="Create working dirs and copy static files to work dir">
+    <mkdir  dir="${dist.home}"/>
+    <mkdir  dir="${work.home}/WEB-INF/classes"/>
+    <mkdir  dir="${work.home}/WEB-INF/lib"/>
+    <!-- Copy static HTML and JSP files to work dir -->
+    <copy todir="${work.home}">
+      <fileset dir="${web.home}"/>
+    </copy>
+  </target>
+
+  <target name="compile" depends="prepare"
+          description="Compile Java sources and copy to WEB-INF/classes dir">
+    <javac srcdir="${src.home}"
+          destdir="${work.home}/WEB-INF/classes">
+        <classpath refid="compile.classpath"/>
+    </javac>
+    <copy  todir="${work.home}/WEB-INF/classes">
+      <fileset dir="${src.home}" excludes="**/*.java"/>
+      <fileset dir="${inc.home}"/>
+    </copy>
+    <copy  todir="${work.home}/WEB-INF/lib">
+      <fileset dir="${lib.home}"/>
+    </copy>
+
+  </target>
+
+
+  <target name="dist" depends="compile"
+          description="Create WAR file for binary distribution">
+    <jar jarfile="${dist.home}/${app.name}.war"
+         basedir="${work.home}"/>
+    <copy  todir="D:\JFW\2015-12-29_eclipse-workspace\se.sthlm.jfw.mainServlet\output">
+        <fileset dir="${dist.home}"/>
+      </copy>
+  	
+  </target>
+
+</project> 
