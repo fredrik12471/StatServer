@@ -47,7 +47,7 @@ import twitter4j.conf.ConfigurationBuilder;
  * @author JFW
  */
 @UrlBinding("/welcome")
-public class TwitterActionBean implements ActionBean {
+public class WelcomeActionBean implements ActionBean {
 
 	private ActionBeanContext context;
     private String authLink;
