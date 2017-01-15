@@ -1,7 +1,9 @@
 package se.sthlm.jfw.mainServlet;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -62,6 +64,8 @@ public class TwitterActionBean implements ActionBean {
     private String timelineRetweeterMin;
     private boolean timelineRetweeter;
     private boolean receiveDMOnUnfollow;
+    
+    private String serverName;
 
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
@@ -92,6 +96,9 @@ public class TwitterActionBean implements ActionBean {
     
     public String getTimelineRetweeterMin() { return timelineRetweeterMin; }
     public void setTimelineRetweeterMin(String timelineRetweeterMin) { this.timelineRetweeterMin = timelineRetweeterMin; }
+	
+    public String getServerName() { return serverName; }
+	public void setServerName(String serverName) { this.serverName = serverName; }
 
 
     public boolean isTimelineRetweeter() {
@@ -110,6 +117,23 @@ public class TwitterActionBean implements ActionBean {
     public Resolution addition() {
 		
 		boolean twitterAccountLoggedIn = false;
+		String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
+		String account_folder = openshift_data_dir + File.separator + "admin";
+		File setupFile = new File(account_folder + File.separator + "setup.txt");
+		try {
+			if(!setupFile.exists())
+				setupFile.createNewFile();
+			BufferedReader setupFileReader = new BufferedReader(new FileReader(setupFile));
+			String localServerName = setupFileReader.readLine();
+			if(localServerName == null) {
+				localServerName = "http://rosenknopp-scomer.rhcloud.com/welcome/";
+			}
+			setServerName(localServerName);
+		setupFileReader.close();
+		} catch(Exception e) {
+			
+		}
+		
     	//oauth_token
     	//oauth_verifier
     	
@@ -140,7 +164,8 @@ public class TwitterActionBean implements ActionBean {
     	
 	    	Twitter twitter = new TwitterFactory().getInstance();
 	    	//PromoBooster
-	    	twitter.setOAuthConsumer("ytjvV2T8q8P8lDvgangbdYylO", "BUXaaJvNylWN9Fr03k5BAxr8Ni6dhIJQRMiVKEcaaHQBvlTHyP");
+	    	twitter.setOAuthConsumer("c6oK4XyCSMIwMb9am8g10938B", "yVM8gD4AyZxVh29IMYSsPnBPxJsh9VpQhyByxQBl559XpntqHc");
+	    	//twitter.setOAuthConsumer("ytjvV2T8q8P8lDvgangbdYylO", "BUXaaJvNylWN9Fr03k5BAxr8Ni6dhIJQRMiVKEcaaHQBvlTHyP");
 	    	//twitter.setOAuthConsumer("6RVGBdbDFl6RzN3PVPEXvLhDP", "AfgyRQkeW9q9byg2Wjwk79OTtRT7vljZKMX2jz4sc9vdmSLKjl");
 	    	//twitter.setOAuthConsumer("FvJHU8pK0bA9RuRDZOK5otymZ", "FZYUXWxBoWegT245dpMssr1RX00Dm8dMhREVOnntFreE5Xmdbn");
 	    	String verifier = oauth_verifier;
@@ -159,10 +184,12 @@ public class TwitterActionBean implements ActionBean {
 	
 		    	ConfigurationBuilder cb = new ConfigurationBuilder();
 				cb.setDebugEnabled(true)
-					.setOAuthConsumerKey("ytjvV2T8q8P8lDvgangbdYylO")
+					.setOAuthConsumerKey("c6oK4XyCSMIwMb9am8g10938B")
+//					.setOAuthConsumerKey("ytjvV2T8q8P8lDvgangbdYylO")
 //					.setOAuthConsumerKey("6RVGBdbDFl6RzN3PVPEXvLhDP")
 //					.setOAuthConsumerKey("FvJHU8pK0bA9RuRDZOK5otymZ")
-					.setOAuthConsumerSecret("BUXaaJvNylWN9Fr03k5BAxr8Ni6dhIJQRMiVKEcaaHQBvlTHyP")
+					.setOAuthConsumerSecret("yVM8gD4AyZxVh29IMYSsPnBPxJsh9VpQhyByxQBl559XpntqHc")
+//					.setOAuthConsumerSecret("BUXaaJvNylWN9Fr03k5BAxr8Ni6dhIJQRMiVKEcaaHQBvlTHyP")
 //					.setOAuthConsumerSecret("AfgyRQkeW9q9byg2Wjwk79OTtRT7vljZKMX2jz4sc9vdmSLKjl")
 //					.setOAuthConsumerSecret("FZYUXWxBoWegT245dpMssr1RX00Dm8dMhREVOnntFreE5Xmdbn")
 					.setOAuthAccessToken(accessToken.getToken())
@@ -172,13 +199,13 @@ public class TwitterActionBean implements ActionBean {
 		    	username = twitter2.getScreenName();
 	
 		    	
-		    	String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
+		    	//String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
 		    	BufferedWriter newInput = new BufferedWriter(new FileWriter(openshift_data_dir + File.separator + "Accounts" + File.separator + twitter.getScreenName() + "-account.txt"));
 		    	
-		    	newInput.write("ytjvV2T8q8P8lDvgangbdYylO" + "\n");
+		    	newInput.write("c6oK4XyCSMIwMb9am8g10938B" + "\n");
 //		    	newInput.write("6RVGBdbDFl6RzN3PVPEXvLhDP" + "\n");
 		    	//newInput.write("FvJHU8pK0bA9RuRDZOK5otymZ" + "\n");
-		    	newInput.write("BUXaaJvNylWN9Fr03k5BAxr8Ni6dhIJQRMiVKEcaaHQBvlTHyP" + "\n");
+		    	newInput.write("yVM8gD4AyZxVh29IMYSsPnBPxJsh9VpQhyByxQBl559XpntqHc" + "\n");
 //		    	newInput.write("AfgyRQkeW9q9byg2Wjwk79OTtRT7vljZKMX2jz4sc9vdmSLKjl" + "\n");
 		    	//newInput.write("FZYUXWxBoWegT245dpMssr1RX00Dm8dMhREVOnntFreE5Xmdbn" + "\n");
 		    	newInput.write(accessToken.getToken() + "\n");
@@ -224,7 +251,7 @@ public class TwitterActionBean implements ActionBean {
 					   // google tokens expire after an hour, but since we requested offline access we can get a new token without user involvement via the refresh token
 					   String accessToken = (String) jsonObject.get("access_token");
 					 
-				    	String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
+				    	//String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
 				    	BufferedWriter newInput = new BufferedWriter(new FileWriter(openshift_data_dir + File.separator + "ScomerService" + File.separator + accessToken + " google token.txt"));
 				    	newInput.write(accessToken + "\n");
 				    	newInput.close();
@@ -261,7 +288,7 @@ public class TwitterActionBean implements ActionBean {
 					   String instagramUsername = (String) user.get("username");
 					   username = instagramUsername;
 					 
-				    	String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
+				    	//String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
 				    	BufferedWriter newInput = new BufferedWriter(new FileWriter(openshift_data_dir + File.separator + "ScomerService" + File.separator + instagramUsername + "-instagram.txt"));
 				    	newInput.write(accessToken + "\n");
 				    	newInput.close();
@@ -278,7 +305,7 @@ public class TwitterActionBean implements ActionBean {
 			        facebook.getOAuthAccessToken(code);            
 			        facebook4j.auth.AccessToken token = facebook.getOAuthAccessToken();
 			        
-			    	String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
+			    	//String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
 			    	BufferedWriter newInput = new BufferedWriter(new FileWriter(openshift_data_dir + File.separator + "ScomerService" + File.separator + facebook.getName() + " facebook token.txt"));
 			    	newInput.write(token.getToken() + "\n");
 			    	newInput.close();
@@ -290,7 +317,8 @@ public class TwitterActionBean implements ActionBean {
 			} else {
 
 		    	RequestToken requestToken;
-		    	String callbackURL = "http://rosebud-scomer.rhcloud.com/welcome/";
+		    	String callbackURL = getServerName();
+//		    	String callbackURL = "http://rosenknopp-scomer.rhcloud.com/welcome/";
 //		    	String callbackURL = "http://instagram-rosebud.rhcloud.com/welcome/";
 		    	try {
 		    		
