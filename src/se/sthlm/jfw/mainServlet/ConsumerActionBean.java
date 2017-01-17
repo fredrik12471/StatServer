@@ -17,7 +17,7 @@ import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.UrlBinding;
 import net.sourceforge.stripes.util.Log;
 
-@UrlBinding("/twitter")
+@UrlBinding("/consume")
 public class ConsumerActionBean implements ActionBean {
     private ActionBeanContext context;
     private String accountName;
