@@ -10,9 +10,11 @@
 </head>
 <body>
 	<h1>Scomer Service - Twitter</h1>
-	Welcome ${actionBean.accountIdentifier}!
-	<br></br>
-
+	Welcome ${actionBean.twitterUser.name} - @${actionBean.twitterUser.screenName}!
+	<br>
+	${actionBean.twitterUser.description}
+	<br><br>
+	You have tweeted ${actionBean.twitterUser.statusesCount} tweets since ${actionBean.twitterUser.createdAt}
 </body>
 </html>
 
