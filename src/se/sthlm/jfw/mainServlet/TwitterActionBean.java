@@ -20,6 +20,7 @@ public class TwitterActionBean implements ActionBean {
     private ActionBeanContext context;
     private String accountIdentifier;
     private User twitterUser;
+    private String data;
     
 	public ActionBeanContext getContext() { return context; }
     public void setContext(ActionBeanContext context) { this.context = context; }
@@ -36,6 +37,12 @@ public class TwitterActionBean implements ActionBean {
 	public void setTwitterUser(User twitterUser) {
 		this.twitterUser = twitterUser;
 	}
+	public String getData() {
+		return data;
+	}
+	public void setData(String data) {
+		this.data = data;
+	}
 	@DefaultHandler
     public Resolution setupData() {
         String account_folder = "";
@@ -48,6 +55,7 @@ public class TwitterActionBean implements ActionBean {
 				accountFolderFile.mkdirs();
 			Twitter twitter = getTwitter(account_folder);
 			twitterUser = twitter.showUser(Long.valueOf(accountIdentifier));
+			data = "12, 13, 14, 2, 8, 10, 12";
 			//twitterUser.getstat
     	} catch(Exception e) {
     		//Ignored for now
