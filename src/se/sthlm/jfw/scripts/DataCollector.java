@@ -36,6 +36,18 @@ public class DataCollector {
     			getAllAccountsFromAnAccount(twitter, followerFileName, twitter.getScreenName(), true);
     			String friendsFileName = fullPath + File.separator + "friends-" + System.currentTimeMillis() + ".txt";
     			getAllAccountsFromAnAccount(twitter, friendsFileName, twitter.getScreenName(), false);
+
+    			String totalFollowerFileName = fullPath + File.separator + "followers.txt";
+    			createFileIfItDoesNotExist(totalFollowerFileName);
+    			BufferedWriter totalFollowerFile = new BufferedWriter(new FileWriter(totalFollowerFileName, true));
+    			totalFollowerFile.write(twitter.showUser(twitter.getId()).getFollowersCount() + "\n");
+    			totalFollowerFile.close();
+    			
+    			String totalFriendsFileName = fullPath + File.separator + "friends.txt";
+    			createFileIfItDoesNotExist(totalFriendsFileName);
+    			BufferedWriter totalFriendsFile = new BufferedWriter(new FileWriter(totalFriendsFileName, true));
+    			totalFriendsFile.write(twitter.showUser(twitter.getId()).getFriendsCount() + "\n");
+    			totalFriendsFile.close();
     		}
     	} catch(Exception e) {
     		e.printStackTrace();
@@ -99,5 +111,13 @@ public class DataCollector {
 			e.printStackTrace();
 		}
 	}
+	
+	private static boolean createFileIfItDoesNotExist(String filename) throws Exception {
+		File file = new File(filename);
+		if(!file.exists())
+			file.createNewFile();
+		return true;
+	}
+
 
 }

@@ -20,7 +20,8 @@ public class TwitterActionBean implements ActionBean {
     private ActionBeanContext context;
     private String accountIdentifier;
     private User twitterUser;
-    private String data;
+    private String followerData;
+    private String friendData;
     
 	public ActionBeanContext getContext() { return context; }
     public void setContext(ActionBeanContext context) { this.context = context; }
@@ -37,12 +38,20 @@ public class TwitterActionBean implements ActionBean {
 	public void setTwitterUser(User twitterUser) {
 		this.twitterUser = twitterUser;
 	}
-	public String getData() {
-		return data;
+	public String getFollowerData() {
+		return followerData;
 	}
-	public void setData(String data) {
-		this.data = data;
+	public void setFollowerData(String followerData) {
+		this.followerData = followerData;
 	}
+	
+	public String getFriendData() {
+		return friendData;
+	}
+	public void setFriendData(String friendData) {
+		this.friendData = friendData;
+	}
+
 	@DefaultHandler
     public Resolution setupData() {
         String account_folder = "";
@@ -55,7 +64,38 @@ public class TwitterActionBean implements ActionBean {
 				accountFolderFile.mkdirs();
 			Twitter twitter = getTwitter(account_folder);
 			twitterUser = twitter.showUser(Long.valueOf(accountIdentifier));
-			data = "12, 13, 14, 2, 8, 10, 12";
+			
+			String totalFollowerFileName = account_folder + File.separator + "followers.txt";
+			BufferedReader input = new BufferedReader(new FileReader(totalFollowerFileName));
+
+			String line = input.readLine();
+			if(line != null) {
+				followerData = line;
+				line = input.readLine();
+				while(line != null) {
+					followerData += ", " + line;
+					line = input.readLine();
+				}
+			}
+				
+			input.close();
+			
+			String totalFriendFileName = account_folder + File.separator + "friends.txt";
+			BufferedReader totalFriendInput = new BufferedReader(new FileReader(totalFriendFileName));
+
+			String totalFriendLine = totalFriendInput.readLine();
+			if(totalFriendLine != null) {
+				friendData = totalFriendLine;
+				totalFriendLine = totalFriendInput.readLine();
+				while(totalFriendLine != null) {
+					friendData += ", " + totalFriendLine;
+					totalFriendLine = totalFriendInput.readLine();
+				}
+			}
+				
+			totalFriendInput.close();
+
+			//data = "12, 13, 14, 2, 8, 10, 12";
 			//twitterUser.getstat
     	} catch(Exception e) {
     		//Ignored for now
