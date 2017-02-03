@@ -2,13 +2,20 @@ package se.sthlm.jfw.mainServlet;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FilenameFilter;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
 
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
 import net.sourceforge.stripes.action.DefaultHandler;
 import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.Resolution;
+import net.sourceforge.stripes.action.StreamingResolution;
 import net.sourceforge.stripes.action.UrlBinding;
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
@@ -22,7 +29,10 @@ public class TwitterActionBean implements ActionBean {
     private User twitterUser;
     private String followerData;
     private String friendData;
+    private String csvFile;
+    private String userId;
     
+
 	public ActionBeanContext getContext() { return context; }
     public void setContext(ActionBeanContext context) { this.context = context; }
 
@@ -51,7 +61,19 @@ public class TwitterActionBean implements ActionBean {
 	public void setFriendData(String friendData) {
 		this.friendData = friendData;
 	}
-
+	public String getCsvFile() {
+		return csvFile;
+	}
+	public void setCsvFile(String csvFile) {
+		this.csvFile = csvFile;
+	}
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	
 	@DefaultHandler
     public Resolution setupData() {
         String account_folder = "";
@@ -97,6 +119,8 @@ public class TwitterActionBean implements ActionBean {
 
 			//data = "12, 13, 14, 2, 8, 10, 12";
 			//twitterUser.getstat
+			
+			
     	} catch(Exception e) {
     		//Ignored for now
     		setAccountIdentifier("" + e.getMessage() + ", " + account_folder);
@@ -121,4 +145,37 @@ public class TwitterActionBean implements ActionBean {
 		TwitterFactory tf = new TwitterFactory(cb.build());
 		return tf.getInstance();
 	}
+	
+	private String getLatestCSVFile(String fullPath) {
+		File accountFolderFile = new File(fullPath);
+
+		String[] files = accountFolderFile.list(new FilenameFilter() {
+		  @Override
+		  public boolean accept(File current, String name) {
+		    return new File(current, name).isFile();
+		  }
+		});
+		
+		Arrays.sort(files, Collections.reverseOrder());
+
+		for(String file : files)
+			if(file.endsWith(".csv"))
+				return fullPath + File.separator + file;
+		return null;
+	}
+	
+
+    public Resolution downloadCsvFile() {
+    	String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
+    	String account_folder = openshift_data_dir + File.separator + "twitter" + File.separator + getUserId();
+    	setCsvFile(getLatestCSVFile(account_folder));
+        InputStream is = null; 
+        try { 
+            is = new FileInputStream(new File(getCsvFile())); 
+        } catch (FileNotFoundException ex) { 
+           
+        } 
+        return new StreamingResolution("text/plain", is).setFilename("followers.csv"); 
+    } 
+
 }

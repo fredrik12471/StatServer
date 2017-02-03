@@ -3,15 +3,19 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
-  <head><title>Scomer Service</title></head>
+  <head>
+  	<title>Scomer Service</title>
+  	<link href="style.css" rel="stylesheet" type="text/css">
+  </head>
   <body>
-    <h1>Scomer Service Login</h1>
+    <div class="description">Scomer Service Login</div>
+    <br><br><br>
 	<a href='${actionBean.authLink}'>Sign in with Twitter</a>
-	<br></br>
+	<br>
 	<a href='${actionBean.instagramLink}'>Sign in with Instagram</a>
-	<br></br>
+	<br>
 	<a href='${actionBean.facebookLink}'>Sign in with Facebook</a>
-	<br></br>
+	<br>
 	<a href='${actionBean.googleLink}'>Sign in with Google</a>
   </body>
 </html>

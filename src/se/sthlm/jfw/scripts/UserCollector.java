@@ -7,7 +7,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 
 import twitter4j.Twitter;
@@ -20,8 +22,8 @@ public class UserCollector {
 	public static void main(String[] args) {
 		try {
 			
-    		//String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
-    		String openshift_data_dir = ".";
+    		String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
+    		//String openshift_data_dir = ".";
 
 
     		String account_folder = openshift_data_dir + File.separator + "twitter";
@@ -40,42 +42,69 @@ public class UserCollector {
     			Twitter twitter = getTwitter(fullPath);
     			twitterList.add(twitter);
     		}
-
-    		String order_folder = openshift_data_dir + File.separator + "orders";
-    		String orderFile = order_folder + File.separator + "followers.csv";
-    		createFileIfItDoesNotExist(orderFile);
     		
-    		BufferedReader orderInput = new BufferedReader(new FileReader(order_folder + File.separator + "order.txt"));
-    		boolean continueLoop = true;
-    		while(continueLoop) {
-    			for(Twitter aTwitter : twitterList) {
-	    			String accountId = orderInput.readLine();
-	    			if(accountId == null) {
-	    				continueLoop = false;
-	    				break;
+    		for(String directory : directories) {
+    			String fullPath = account_folder + File.separator + directory;
+	    		String orderFile = getLatestFollowerFile(fullPath).replace(".txt", ".csv");
+	    		createFileIfItDoesNotExist(orderFile);
+	    		
+	    		BufferedReader orderInput = new BufferedReader(new FileReader(getLatestFollowerFile(fullPath)));
+	    		boolean continueLoop = true;
+	    		while(continueLoop) {
+	    			for(Twitter aTwitter : twitterList) {
+		    			String accountId = orderInput.readLine();
+		    			if(accountId == null) {
+		    				continueLoop = false;
+		    				break;
+		    			}
+		    			User twitterUser = null;
+		    			try {
+		    				twitterUser = aTwitter.showUser(Long.valueOf(accountId));
+		    			} catch(Exception e) {
+		    				//Ignored for now, users may have been suspended
+		    			}
+		    			if(twitterUser != null) {
+			    			BufferedWriter userOutput = new BufferedWriter(new FileWriter(orderFile, true));
+			    			
+			    			userOutput.write("@" + cleanUpString(twitterUser.getScreenName()) + ";" + 
+			    								   cleanUpString(twitterUser.getDescription()) + ";" +
+			    								   cleanUpString(twitterUser.getLocation()) + ";" +
+			    								   twitterUser.getFollowersCount() + ";" +
+			    								   twitterUser.getFriendsCount() + ";" +
+			    								   userIsActive(twitterUser) + ";" +
+			    			"\n");
+			    			// inactive/active, and each accounts bio, location, # followers,
+			    			userOutput.close();
+		    			}
 	    			}
-	    			User twitterUser = aTwitter.showUser(Long.valueOf(accountId));
-	    			BufferedWriter userOutput = new BufferedWriter(new FileWriter(orderFile, true));
-	    			
-	    			userOutput.write("@" + cleanUpString(twitterUser.getScreenName()) + ";" + 
-	    								   cleanUpString(twitterUser.getDescription()) + ";" +
-	    								   cleanUpString(twitterUser.getLocation()) + ";" +
-	    								   twitterUser.getFollowersCount() + ";" +
-	    								   twitterUser.getFriendsCount() + ";" +
-	    								   userIsActive(twitterUser) + ";" +
-	    			"\n");
-	    			// inactive/active, and each accounts bio, location, # followers,
-	    			userOutput.close();
-    			}
-    			Thread.sleep(1000);
+	    			Thread.sleep(3000);
+	    		}
+	    		orderInput.close();
     		}
-    		orderInput.close();
-    		
+	    		
     	} catch(Exception e) {
     		e.printStackTrace();
     	}
 	}
 	
+	private static String getLatestFollowerFile(String fullPath) {
+		File accountFolderFile = new File(fullPath);
+
+		String[] files = accountFolderFile.list(new FilenameFilter() {
+		  @Override
+		  public boolean accept(File current, String name) {
+		    return new File(current, name).isFile();
+		  }
+		});
+		
+		Arrays.sort(files, Collections.reverseOrder());
+
+		for(String file : files)
+			if(file.startsWith("followers-"))
+				return fullPath + File.separator + file;
+		return null;
+	}
+
 	private static boolean userIsActive(User twitterUser) {
 		if(twitterUser.getStatus() == null)
 			return false;
