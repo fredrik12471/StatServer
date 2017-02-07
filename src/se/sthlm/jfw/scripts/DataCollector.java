@@ -19,6 +19,8 @@ public class DataCollector {
 	public static void main(String[] args) {
 		try {
     		String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
+    		//String openshift_data_dir = ".";
+
     		String account_folder = openshift_data_dir + File.separator + "twitter";
     		File accountFolderFile = new File(account_folder);
     		//File file = new File("/path/to/directory");
@@ -30,6 +32,7 @@ public class DataCollector {
     		});
     		//System.out.println(Arrays.toString(directories));
     		for(String directory : directories) {
+
     			String fullPath = account_folder + File.separator + directory;
     			Twitter twitter = getTwitter(fullPath);
     			String followerFileName = fullPath + File.separator + "followers-" + System.currentTimeMillis() + ".txt";

@@ -45,7 +45,10 @@ public class UserCollector {
     		
     		for(String directory : directories) {
     			String fullPath = account_folder + File.separator + directory;
-	    		String orderFile = getLatestFollowerFile(fullPath).replace(".txt", ".csv");
+    			String latestFollowerFile = getLatestFollowerFile(fullPath);
+    			if(latestFollowerFile == null)
+    				continue;
+	    		String orderFile = latestFollowerFile.replace(".txt", ".csv");
 	    		createFileIfItDoesNotExist(orderFile);
 	    		
 	    		BufferedReader orderInput = new BufferedReader(new FileReader(getLatestFollowerFile(fullPath)));
@@ -62,11 +65,14 @@ public class UserCollector {
 		    				twitterUser = aTwitter.showUser(Long.valueOf(accountId));
 		    			} catch(Exception e) {
 		    				//Ignored for now, users may have been suspended
+		    				//e.printStackTrace();
 		    			}
 		    			if(twitterUser != null) {
 			    			BufferedWriter userOutput = new BufferedWriter(new FileWriter(orderFile, true));
 			    			
-			    			userOutput.write("@" + cleanUpString(twitterUser.getScreenName()) + ";" + 
+			    			userOutput.write(cleanUpString(twitterUser.getName()) + ";" +
+			    					         "@" + cleanUpString(twitterUser.getScreenName()) + ";" + 
+			    					         cleanUpString(twitterUser.getURL()) + ";" +
 			    								   cleanUpString(twitterUser.getDescription()) + ";" +
 			    								   cleanUpString(twitterUser.getLocation()) + ";" +
 			    								   twitterUser.getFollowersCount() + ";" +
@@ -77,7 +83,7 @@ public class UserCollector {
 			    			userOutput.close();
 		    			}
 	    			}
-	    			Thread.sleep(3000);
+	    			Thread.sleep(1000);
 	    		}
 	    		orderInput.close();
     		}
@@ -117,8 +123,9 @@ public class UserCollector {
 	}
 
 	private static String cleanUpString(String string) {
-		
-		return string.replace("\n", ",").replace("\r", "");
+		if(string == null)
+			string = "";
+		return string.replace("\n", ",").replace("\r", "").replace(";", ",");
 	}
 
 	private static Twitter getTwitter(String accountFolder) throws Exception {
