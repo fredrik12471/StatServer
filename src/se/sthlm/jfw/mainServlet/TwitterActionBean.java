@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -17,12 +18,13 @@ import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.StreamingResolution;
 import net.sourceforge.stripes.action.UrlBinding;
+import net.sourceforge.stripes.util.Log;
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
 import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
-@UrlBinding("/twitter")
+@UrlBinding("/twitter/{username}")
 public class TwitterActionBean implements ActionBean {
     private ActionBeanContext context;
     private String accountIdentifier;
@@ -32,6 +34,8 @@ public class TwitterActionBean implements ActionBean {
     private String csvFile;
     private String userId;
     
+    private String username;
+	private static final Log logger = Log.getInstance(TwitterActionBean.class);
 
 	public ActionBeanContext getContext() { return context; }
     public void setContext(ActionBeanContext context) { this.context = context; }
@@ -73,20 +77,46 @@ public class TwitterActionBean implements ActionBean {
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
 	
 	@DefaultHandler
     public Resolution setupData() {
         String account_folder = "";
     	try {
+    		
+    		logger.info("In setupData");
+    		//logger.info("I am alive!");
        		String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
-    		accountIdentifier = getContext().getRequest().getSession().getAttribute("accountIdentifier").toString();
+    		//String un = getContext().getRequest().getParameter("un");
+       		
+       		if(username != null) {
+       			logger.info("username:" + username);
+       			accountIdentifier = getAccountIdentifierFromUsername(username);
+       		} else {
+       			accountIdentifier = getContext().getRequest().getSession().getAttribute("accountIdentifier").toString();
+       		}
+   			logger.info("accountIdentifier:" + accountIdentifier);
     		account_folder = openshift_data_dir + File.separator + "twitter" + File.separator + accountIdentifier;
     		File accountFolderFile = new File(account_folder);
 			if(!accountFolderFile.exists())
 				accountFolderFile.mkdirs();
-			Twitter twitter = getTwitter(account_folder);
-			twitterUser = twitter.showUser(Long.valueOf(accountIdentifier));
-			
+			//Twitter twitter = getTwitter(account_folder);
+			//twitterUser = twitter.showUser(Long.valueOf(accountIdentifier));
+			String userFileName = account_folder + File.separator + "user.twitter";
+			FileInputStream fi = new FileInputStream(new File(userFileName));
+			ObjectInputStream oi = new ObjectInputStream(fi);
+
+			// Read objects
+			twitterUser = (User) oi.readObject();
+
+			oi.close();
+			fi.close();
+
 			String totalFollowerFileName = account_folder + File.separator + "followers.txt";
 			BufferedReader input = new BufferedReader(new FileReader(totalFollowerFileName));
 
@@ -128,6 +158,21 @@ public class TwitterActionBean implements ActionBean {
 
     	return new ForwardResolution("/WEB-INF/twitter.jsp");
     }
+	
+	private String getAccountIdentifierFromUsername(String username) throws Exception {
+		String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
+		BufferedReader mapInput = new BufferedReader(new FileReader(openshift_data_dir + File.separator + "map.txt"));
+		String mapInputLine = mapInput.readLine();
+		while(mapInputLine != null) {
+			if((mapInputLine.split(":")[0]).toLowerCase().equals(username.toLowerCase())) {
+				mapInput.close();
+				return mapInputLine.split(":")[1];
+			}
+			mapInputLine = mapInput.readLine();
+		}
+		mapInput.close();
+		return null;
+	}
 	
 	private Twitter getTwitter(String accountFolder) throws Exception {
 		BufferedReader input = new BufferedReader(new FileReader(accountFolder + File.separator + "account.txt"));

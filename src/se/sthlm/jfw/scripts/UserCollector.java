@@ -18,13 +18,11 @@ import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class UserCollector {
-
 	public static void main(String[] args) {
 		try {
 			
     		String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
     		//String openshift_data_dir = ".";
-
 
     		String account_folder = openshift_data_dir + File.separator + "twitter";
     		File accountFolderFile = new File(account_folder);
@@ -50,7 +48,6 @@ public class UserCollector {
     				continue;
 	    		String orderFile = latestFollowerFile.replace(".txt", ".csv");
 	    		createFileIfItDoesNotExist(orderFile);
-	    		
 	    		BufferedReader orderInput = new BufferedReader(new FileReader(getLatestFollowerFile(fullPath)));
 	    		boolean continueLoop = true;
 	    		while(continueLoop) {
@@ -89,7 +86,6 @@ public class UserCollector {
     		}
 	    		
     	} catch(Exception e) {
-    		e.printStackTrace();
     	}
 	}
 	
@@ -125,7 +121,7 @@ public class UserCollector {
 	private static String cleanUpString(String string) {
 		if(string == null)
 			string = "";
-		return string.replace("\n", ",").replace("\r", "").replace(";", ",");
+		return string.replace("\n", " ").replace("\r", "").replace(",", "");
 	}
 
 	private static Twitter getTwitter(String accountFolder) throws Exception {

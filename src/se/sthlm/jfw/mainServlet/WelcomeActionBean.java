@@ -3,9 +3,11 @@ package se.sthlm.jfw.mainServlet;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +40,7 @@ import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.UrlBinding;
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
+import twitter4j.User;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 import twitter4j.conf.ConfigurationBuilder;
@@ -171,8 +174,9 @@ public class WelcomeActionBean implements ActionBean {
 				.setOAuthAccessTokenSecret(accessToken.getTokenSecret());
 				TwitterFactory tf = new TwitterFactory(cb.build());
 				Twitter twitter2 = tf.getInstance();
-				username = twitter2.getScreenName();
-				userId = "" + twitter2.getId();
+				User twitterUser = twitter2.verifyCredentials();
+				username = twitterUser.getScreenName();
+				userId = "" + twitterUser.getId();
 
 				String twitterAccountFolder = openshift_data_dir + File.separator + "twitter" + File.separator + userId;
 				File accountFolderFile = new File(twitterAccountFolder);
@@ -194,7 +198,7 @@ public class WelcomeActionBean implements ActionBean {
 				newInput.write(accessToken.getTokenSecret() + "\n");
 				newInput.close();
 
-				createDashboardPage(twitter2);
+				createDashboardPage(twitterUser);
 				twitterAccountLoggedIn = true;
 
 			} else if(code != null && !code.equals("")) {
@@ -355,9 +359,33 @@ public class WelcomeActionBean implements ActionBean {
 	//		return new ForwardResolution("/WEB-INF/welcome.jsp");
 	//	}
 
-	private void createDashboardPage(Twitter twitter2) {
-		// TODO Auto-generated method stub
+	private void createDashboardPage(User twitterUser) throws Exception {
+		String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
+		String twitterAccountFolder = openshift_data_dir + File.separator + "twitter" + File.separator + twitterUser.getId();
+		String userFileName = twitterAccountFolder + File.separator + "user.twitter";
+		createFileIfItDoesNotExist(userFileName);
+		FileOutputStream f = new FileOutputStream(new File(userFileName));
+		ObjectOutputStream o = new ObjectOutputStream(f);
+
+		o.writeObject(twitterUser);
+
+		o.close();
+		f.close();
 		
+		boolean nameIsFoundInMapFile = false;
+		String mapFileName = openshift_data_dir + File.separator + "map.txt";
+		BufferedReader input = new BufferedReader(new FileReader(mapFileName));
+		String line = input.readLine();
+		while(line != null) {
+			if(line.toLowerCase().startsWith(twitterUser.getScreenName().toLowerCase()))
+				nameIsFoundInMapFile = true;
+			line = input.readLine();
+		}
+		if(!nameIsFoundInMapFile) {
+			BufferedWriter newInput = new BufferedWriter(new FileWriter(mapFileName, true));
+			newInput.write(twitterUser.getScreenName() + ":" + twitterUser.getId() + "\n");
+			newInput.close();
+		}
 	}
 	
 	// makes a POST request to url with form parameters and returns body as a string
@@ -388,6 +416,13 @@ public class WelcomeActionBean implements ActionBean {
 		}
 
 		return body;
+	}
+	
+	private static boolean createFileIfItDoesNotExist(String filename) throws Exception {
+		File file = new File(filename);
+		if(!file.exists())
+			file.createNewFile();
+		return true;
 	}
 
 }

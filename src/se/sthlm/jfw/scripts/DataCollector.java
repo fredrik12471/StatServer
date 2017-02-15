@@ -3,15 +3,18 @@ package se.sthlm.jfw.scripts;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
+import java.io.ObjectOutputStream;
 import java.util.Map;
 
 import twitter4j.IDs;
 import twitter4j.RateLimitStatus;
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
+import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class DataCollector {
@@ -51,6 +54,18 @@ public class DataCollector {
     			BufferedWriter totalFriendsFile = new BufferedWriter(new FileWriter(totalFriendsFileName, true));
     			totalFriendsFile.write(twitter.showUser(twitter.getId()).getFriendsCount() + "\n");
     			totalFriendsFile.close();
+    			
+    			String userFileName = fullPath + File.separator + "user.twitter";
+    			createFileIfItDoesNotExist(userFileName);
+    			FileOutputStream f = new FileOutputStream(new File(userFileName));
+    			ObjectOutputStream o = new ObjectOutputStream(f);
+
+    			// Write objects to file
+    			User user = twitter.verifyCredentials();
+    			o.writeObject(user);
+
+    			o.close();
+    			f.close();
     		}
     	} catch(Exception e) {
     		e.printStackTrace();

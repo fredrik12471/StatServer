@@ -6,8 +6,8 @@
 <html>
 <head>
 <title>Scomer Service</title>
-<link href="style.css" rel="stylesheet" type="text/css">
-<script src="Chart.js"></script>
+<link href="/style.css" rel="stylesheet" type="text/css">
+<script src="/Chart.js"></script>
 </head>
 <body>
 <div class="header">
