@@ -10,21 +10,28 @@
 <script src="/Chart.js"></script>
 </head>
 <body>
+<div class="top">
+<div class="cartoon"><img src="/squid-51x38.jpg" class="iconDetails"/><div class="text">NonStopSquid.se - Social Statistics!</div></div>
+</div>
 <div class="header">
     <div class="image"><img src="http://placehold.it/64x64"/></div>
-    <div class="text1">Header Text</div>
-    <div class="text2">Header Text</div>
+    <div class="text1">${actionBean.twitterUser.name} - @${actionBean.twitterUser.screenName}</div>
+    <div class="text2">${actionBean.twitterUser.description}</div>
 </div>
-	<div class="description">Scomer Service - Twitter</div>
-	Welcome ${actionBean.twitterUser.name} - @${actionBean.twitterUser.screenName}!
-	<br>
-	${actionBean.twitterUser.description}
+<div class="main">
+	<br><br>
 	<br><br>
 	You have tweeted ${actionBean.twitterUser.statusesCount} tweets since ${actionBean.twitterUser.createdAt}
 	<br><br>
 	You have ${actionBean.twitterUser.followersCount} followers and ${actionBean.twitterUser.friendsCount} friends
 	<br><br>
+	</div>
+	<div class="line">&nbsp;</div>
+	<div class="main">
 	<canvas id=myChart></canvas>
+	</div>
+		<div class="line">&nbsp;</div>
+		<div class="main">
 	<script>
 	var ctx = document.getElementById("myChart").getContext("2d");
 	ctx.canvas.width = 200;
@@ -92,9 +99,11 @@ var myLineChart = new Chart(ctx, {
 });
 
 </script>
+	<br><br>
 <stripes:link href="/twitter" event="downloadCsvFile" >Download spreadsheet with information about all your followers
 <stripes:param name="userId" value="${actionBean.twitterUser.id}"/>
 </stripes:link>
+</div>
 </body>
 </html>
 

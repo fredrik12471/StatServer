@@ -1,7 +1,7 @@
 /* Generic Selectors */
 
 body {
-	font-family: Verdana;
+	font-family: Arial;
 	/* font-size: 140px; */
 	color: #333333;		
 	background-color: #F9F9F9;
@@ -21,14 +21,14 @@ li {
 
 h1 {
 
-	font-family: Verdana;
+	font-family: Arial;
 	font-size: 18px;
 	font-weight: bold;
 	color: #000000;
 }
 
 h2 {
-	font-family: Verdana;
+	font-family: Arial;
 	font-size: 16px;
 	font-weight: bold;
 	color: #000000;
@@ -97,17 +97,17 @@ div.description {
 
 .header {
     background: grey;
-    height: 120px;
+    height: 95px;
     width: 100%;
 }
 
 .header .image {
 
-    width: 140px;
-    height: 140px;
-    border:2px solid green;
-position:relative;
-float:left;
+    width: 180px;
+    height: 120px;
+    //border:2px solid green;
+	position:relative;
+	float:left;
 }
 
 .header .image img {
@@ -117,22 +117,69 @@ bottom:0px;
 right:0px;
 }
 .header .text1 {
-    font: x-large sans-serif;
+    font: Arial;
     /*border:2px solid blue;*/
-    
-      border:2px solid green;
-      margin-left: 150px;
+    font-weight: bold;
+	font-size: 28px;
+      //border:2px solid green;
+      margin-left: 190px;
        position:absolute;
-       top:80px;
+       top:110px;
 
 }
 
 .header .text2 {
-    font: large sans-serif;
-       border:2px solid green;
-      margin-left: 150px;
+    font: Arial;
+    /*border:2px solid blue;*/
+	font-size: 14px;
+      margin-left: 190px;
        position:absolute;
-       top:100px;
+       top:147px;
+
+}
+/************************** main */
+
+.main {
+  width: 600px;
+  margin: 0 auto; 
+}
+
+/************************** top */
+
+.top {
+    background: black;
+    height: 40px;
+    width: 100%;
+}
+
+.top .cartoon {
+	width: 400px;
+	margin: 0 auto;
 
 }
 
+.top .cartoon .text {
+	position:absolute;
+	margin-left:70px;
+	margin-top: 8px;
+       color: #AABBCC;
+       	font-family: Arial;
+	font-weight: bold;
+	font-size: 18px;
+}
+
+ .iconDetails {
+ margin-left:2%;
+float:left; 
+
+} 
+
+/************************** line */
+
+.line {
+  width: 800px;
+  height: 2px;
+  margin: 0 auto;
+  background: purple;
+
+}

@@ -243,8 +243,7 @@ public class WelcomeActionBean implements ActionBean {
 							.put("code", code)
 							.put("client_id", "21be52cec5e8428eb6a551cb83706709")
 							.put("client_secret", "e5d3775698cc412984feea1820dce20c")
-							.put("redirect_uri", "http://rosebud-scomer.rhcloud.com/welcome/")
-
+							.put("redirect_uri", "http://rosenknopp-scomer.rhcloud.com/welcome/")
 							.put("grant_type", "authorization_code").build());
 
 					JSONObject jsonObject = null;
@@ -263,10 +262,16 @@ public class WelcomeActionBean implements ActionBean {
 					String instagramUsername = (String) user.get("username");
 					username = instagramUsername;
 
+					
+//					createDashboardPage(twitterUser);
+//					getContext().getRequest().getSession().setAttribute("accountIdentifier", userId);
+					
 					//String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
-					BufferedWriter newInput = new BufferedWriter(new FileWriter(openshift_data_dir + File.separator + "ScomerService" + File.separator + instagramUsername + "-instagram.txt"));
+					BufferedWriter newInput = new BufferedWriter(new FileWriter(openshift_data_dir + File.separator + "instagram" + File.separator + instagramUsername + "-instagram.txt"));
 					newInput.write(accessToken + "\n");
 					newInput.close();
+					
+					return new RedirectResolution("/instagram");
 
 					//username = "Google login";
 				} else {
@@ -327,7 +332,7 @@ public class WelcomeActionBean implements ActionBean {
 
 
 
-				instagramLink = "https://api.instagram.com/oauth/authorize/?client_id=21be52cec5e8428eb6a551cb83706709&redirect_uri=http://rosebud-scomer.rhcloud.com/welcome/&response_type=code&state=instagram&scope=public_content";
+				instagramLink = "https://api.instagram.com/oauth/authorize/?client_id=21be52cec5e8428eb6a551cb83706709&redirect_uri=http://rosenknopp-scomer.rhcloud.com/welcome/&response_type=code&state=instagram&scope=public_content+follower_list";
 
 
 				return new ForwardResolution("/WEB-INF/index.jsp");
@@ -386,6 +391,7 @@ public class WelcomeActionBean implements ActionBean {
 			newInput.write(twitterUser.getScreenName() + ":" + twitterUser.getId() + "\n");
 			newInput.close();
 		}
+		input.close();
 	}
 	
 	// makes a POST request to url with form parameters and returns body as a string
