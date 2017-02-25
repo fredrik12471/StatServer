@@ -1,7 +1,7 @@
 /* Generic Selectors */
 
 body {
-	font-family: Arial;
+	font-family: Tahoma;
 	/* font-size: 140px; */
 	color: #333333;		
 	background-color: #F9F9F9;
@@ -21,14 +21,14 @@ li {
 
 h1 {
 
-	font-family: Arial;
+	font-family: Tahoma;
 	font-size: 18px;
 	font-weight: bold;
 	color: #000000;
 }
 
 h2 {
-	font-family: Arial;
+	font-family: Tahoma;
 	font-size: 16px;
 	font-weight: bold;
 	color: #000000;
@@ -98,6 +98,7 @@ div.description {
 	   background: grey;
     height: 55px;
   	width: 100%;
+  	flex: 1;
 }
 
 
@@ -126,31 +127,45 @@ height: 64;
 width: 64;
 }
 .header .text1 {
-    font: Arial;
+    font: Tahoma;
     /*border:2px solid blue;*/
     font-weight: bold;
 	font-size: 24px;
       //border:2px solid green;
       margin-left: 190px;
        position:absolute;
-       top:70px;
+       top:67px;
 
 }
 
 .header .text2 {
-    font: Arial;
+    font: Tahoma;
     /*border:2px solid blue;*/
-	font-size: 13px;
+	font-size: 14px;
       margin-left: 190px;
        position:absolute;
-       top:107px;
+       top:96px;
 
+}
+
+.white-header {
+
+	   background: grey;
+    height: 25px;
+  	width: 100%;
+  	 background: white;
+  	   	flex: 1;
 }
 /************************** main */
 
 .main {
-  width: 600px;
-  margin: 0 auto; 
+	display: flex;
+/*   width: 600px;
+  margin: 0 auto; */
+  justify-content: space-between;
+   	font-family: Tahoma;
+ 	vertical-align: middle;
+    text-align: center;
 }
 
 /************************** top */
@@ -172,7 +187,7 @@ width: 64;
 	margin-left:70px;
 	margin-top: 8px;
        color: #AABBCC;
-       	font-family: Arial;
+       	font-family: Tahoma;
 	font-weight: bold;
 	font-size: 18px;
 }
@@ -196,20 +211,31 @@ float:left;
 /************************** canvas */
 
 .canvas-div {
-		height: 250px;
+/* 		height: 250px;
 		  width: 600px;
-  margin: 0 auto; 
-}
+  margin: 0 auto;  */
+  	display: flex;
+/*   width: 600px;
+  margin: 0 auto; */
+/*   justify-content: space-between;
+ */
+ width: 400px;
+ margin: 0 auto;
+ }
 
 .canvas1 {
-	float:left;
-	margin-left:5%;
+/* 	float:left;
+	margin-left:5%; */
+/* 	margin: 20px 0px 20px 20px; */
+		border: 1px black;
 }
 
 .canvas2 {
-	position:absolute;
-	margin-left:250px;
-
+/* 	position:absolute;
+	margin-left:250px; */
+/* 	margin: 20px 0px 20px 20px; */
+/* 	text-align: left; */
+	border: 1px black;
 }
 /************************** presentation */
 html,
@@ -265,7 +291,7 @@ body {
    text-shadow: rgba(0,0,0,.4) 0 1px 0;
    color: white;
    font-size: 15px;
-   font-family: Arial;
+   font-family: Tahoma;
    text-decoration: none;
    vertical-align: middle;
    }
@@ -278,3 +304,37 @@ body {
    border-top-color: #1b435e;
    background: #1b435e;
    }
+/************************* info */ 
+   .info {
+    background: #CCCCCC;
+    height: 27px;
+  	width: 100%;
+ 	text-align: center;
+ 	font-family: Tahoma;
+ 	vertical-align: middle;
+    text-align: center;
+    padding-top: 6px;
+}
+
+.account-info-col-1 {
+	width: 50%;
+	text-align: right;
+	margin: 20px 0px 20px 20px;
+}
+
+.account-info-col-2 {
+	width: 50%;
+	text-align: left;
+	margin: 20px 0px 20px 20px;
+}
+/************************* linktext */ 
+   .linktext {
+/*     background: #CCCCCC; */
+    height: 27px;
+  	width: 100%;
+ 	text-align: center;
+ 	font-family: Tahoma;
+ 	vertical-align: middle;
+    text-align: center;
+    padding-top: 6px;
+}

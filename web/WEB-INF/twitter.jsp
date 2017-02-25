@@ -10,6 +10,7 @@
 <script src="/Chart.js"></script>
 </head>
 <body>
+<div class="flex-grid">
 <div class="top">
 <div class="cartoon"><img src="/squid-51x38.jpg" class="iconDetails"/><div class="text">NonStopSquid.se - Social Statistics!</div></div>
 </div>
@@ -21,22 +22,38 @@
     <div class="text2">${actionBean.twitterUser.description}</div>
 </div>
 </div>
+<div class="white-header">&nbsp;
+</div>
+<div class="info">
+Data collected ${actionBean.dataDate}
+</div>
 <div class="main">
 	<br><br>
 	<br><br>
-	You have tweeted ${actionBean.twitterUser.statusesCount} tweets since ${actionBean.twitterUser.createdAt}
-	<br><br>
-	You have ${actionBean.twitterUser.followersCount} followers and ${actionBean.twitterUser.friendsCount} friends
-	<br><br>
+	<div class="account-info-col-1">
+	Account started:<br>
+	Tweets:<br>
+	Followers:<br>
+	Friends:<br>
+	</div>
+	<div class="account-info-col-2">
+	${actionBean.twitterUser.createdAt}<br>
+	${actionBean.twitterUser.statusesCount}<br>
+	${actionBean.twitterUser.followersCount}<br>
+	${actionBean.twitterUser.friendsCount}<br>
+	</div>
+
 	</div>
 	<div class="line">&nbsp;</div>
-		<br><br>
+		<br>
 	<div class="canvas-div">
-	<canvas id=myChart1 class="canvas1"></canvas>
-	<canvas id=myChart2 class="canvas2"></canvas>
+	<div class="canvas1"><canvas id=myChart1></canvas></div>
+	<div class="canvas2"><canvas id=myChart2></canvas></div>
+
 	</div>
+			<br><br>
 		<div class="line">&nbsp;</div>
-		<div class="main">
+		<div class="linktext">
 	<script>
 	var ctx1 = document.getElementById("myChart1").getContext("2d");
 	ctx1.canvas.width = 200;
@@ -127,6 +144,7 @@ options: {
 <stripes:link href="/twitter" event="downloadCsvFile" >Download spreadsheet with information about all your followers
 <stripes:param name="userId" value="${actionBean.twitterUser.id}"/>
 </stripes:link>
+</div>
 </div>
 </body>
 </html>

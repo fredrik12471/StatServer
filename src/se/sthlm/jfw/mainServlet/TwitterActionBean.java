@@ -8,8 +8,16 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
@@ -33,6 +41,7 @@ public class TwitterActionBean implements ActionBean {
     private String friendData;
     private String csvFile;
     private String userId;
+    private String dataDate;
     
     private String username;
 	private static final Log logger = Log.getInstance(TwitterActionBean.class);
@@ -83,6 +92,12 @@ public class TwitterActionBean implements ActionBean {
 	public void setUsername(String username) {
 		this.username = username;
 	}
+	public String getDataDate() {
+		return dataDate;
+	}
+	public void setDataDate(String dataDate) {
+		this.dataDate = dataDate;
+	}
 	
 	@DefaultHandler
     public Resolution setupData() {
@@ -108,7 +123,18 @@ public class TwitterActionBean implements ActionBean {
 			//Twitter twitter = getTwitter(account_folder);
 			//twitterUser = twitter.showUser(Long.valueOf(accountIdentifier));
 			String userFileName = account_folder + File.separator + "user.twitter";
-			FileInputStream fi = new FileInputStream(new File(userFileName));
+			
+			Path file = Paths.get(userFileName);
+			BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
+			
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS",Locale.ENGLISH);
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTimeInMillis(attr.lastModifiedTime().toMillis());
+			sdf.setTimeZone(TimeZone.getTimeZone("CET"));
+			dataDate = sdf.format(calendar.getTime());
+			
+			File objectFile = new File(userFileName);
+			FileInputStream fi = new FileInputStream(objectFile);
 			ObjectInputStream oi = new ObjectInputStream(fi);
 
 			// Read objects
