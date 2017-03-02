@@ -70,6 +70,19 @@ public class AdminActionBean implements ActionBean {
 				line = input.readLine();
 			}
 			input.close();
+			
+			
+			String instagramMapFileName = openshift_data_dir + File.separator + "instagram-map.txt";
+			BufferedReader instagramInput = new BufferedReader(new FileReader(instagramMapFileName));
+			String instagramLine = instagramInput.readLine();
+			while(instagramLine != null) {
+				String linkToAdd = userLink + "/instagram/" + instagramLine.split(":")[0];
+				userList.add(linkToAdd);
+				logger.info(linkToAdd);
+				instagramLine = instagramInput.readLine();
+			}
+			instagramInput.close();
+			
 			logger.info("Size of userlist: " + userList.size());
 		} catch(Exception e) {
 			//Ignored for now

@@ -23,6 +23,9 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.instagram4j.DefaultInstagramClient;
+import org.instagram4j.InstagramClient;
+import org.instagram4j.Result;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -38,6 +41,7 @@ import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.RedirectResolution;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.UrlBinding;
+import se.sthlm.jfw.mainServlet.data.SocialMediaUser;
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
 import twitter4j.User;
@@ -238,7 +242,7 @@ public class WelcomeActionBean implements ActionBean {
 
 
 
-					// get the access token by post to Google
+					// get the access token by post to Instagram
 					String body = post("https://api.instagram.com/oauth/access_token", ImmutableMap.<String,String>builder()
 							.put("code", code)
 							.put("client_id", "21be52cec5e8428eb6a551cb83706709")
@@ -258,20 +262,33 @@ public class WelcomeActionBean implements ActionBean {
 					//username = jsonObject.toString();
 					// google tokens expire after an hour, but since we requested offline access we can get a new token without user involvement via the refresh token
 					String accessToken = (String) jsonObject.get("access_token");
-					JSONObject user = (JSONObject) jsonObject.get("user");
-					String instagramUsername = (String) user.get("username");
-					username = instagramUsername;
-
 					
-//					createDashboardPage(twitterUser);
-//					getContext().getRequest().getSession().setAttribute("accountIdentifier", userId);
 					
-					//String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
-					BufferedWriter newInput = new BufferedWriter(new FileWriter(openshift_data_dir + File.separator + "instagram" + File.separator + instagramUsername + "-instagram.txt"));
+				    InstagramClient client = new DefaultInstagramClient("21be52cec5e8428eb6a551cb83706709", "e5d3775698cc412984feea1820dce20c", 
+				    		accessToken);
+				    
+			    	Result<org.instagram4j.entity.User> result = client.getCurrentUser();
+			    	org.instagram4j.entity.User instagramUser = result.getData();
+					//JSONObject user = (JSONObject) jsonObject.get("user");
+					//String instagramUsername = (String) user.get("username");
+					username = instagramUser.getUsername();
+					userId = instagramUser.getId();
+					
+					String instagramAccountFolder = openshift_data_dir + File.separator + "instagram" + File.separator + userId;
+					File accountFolderFile = new File(instagramAccountFolder);
+					if(!accountFolderFile.exists()) {
+						//accountFolderFile.createNewFile();
+						accountFolderFile.mkdirs();
+					}
+					
+					BufferedWriter newInput = new BufferedWriter(new FileWriter(accountFolderFile + File.separator + "account.txt"));
 					newInput.write(accessToken + "\n");
 					newInput.close();
 					
-					return new RedirectResolution("/instagram");
+					createDashboardPage(instagramUser);
+			
+					
+					return new RedirectResolution("/instagram/" + instagramUser.getUsername());
 
 					//username = "Google login";
 				} else {
@@ -364,6 +381,39 @@ public class WelcomeActionBean implements ActionBean {
 	//		return new ForwardResolution("/WEB-INF/welcome.jsp");
 	//	}
 
+	private void createDashboardPage(org.instagram4j.entity.User instagramUser) throws Exception {
+		String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
+		String instagramAccountFolder = openshift_data_dir + File.separator + "instagram" + File.separator + instagramUser.getId();
+		String userFileName = instagramAccountFolder + File.separator + "user.instagram";
+		createFileIfItDoesNotExist(userFileName);
+		FileOutputStream f = new FileOutputStream(new File(userFileName));
+		ObjectOutputStream o = new ObjectOutputStream(f);
+
+		SocialMediaUser socialMediaUser = new SocialMediaUser(instagramUser);
+		o.writeObject(socialMediaUser);
+
+		o.close();
+		f.close();
+		
+		boolean nameIsFoundInMapFile = false;
+		String mapFileName = openshift_data_dir + File.separator + "instagram-map.txt";
+		BufferedReader input = new BufferedReader(new FileReader(mapFileName));
+		String line = input.readLine();
+		while(line != null) {
+			if(line.toLowerCase().startsWith(instagramUser.getUsername().toLowerCase()))
+				nameIsFoundInMapFile = true;
+			line = input.readLine();
+		}
+		if(!nameIsFoundInMapFile) {
+			BufferedWriter newInput = new BufferedWriter(new FileWriter(mapFileName, true));
+			newInput.write(instagramUser.getUsername() + ":" + instagramUser.getId() + "\n");
+			newInput.close();
+		}
+		input.close();
+	}
+	
+	
+	
 	private void createDashboardPage(User twitterUser) throws Exception {
 		String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
 		String twitterAccountFolder = openshift_data_dir + File.separator + "twitter" + File.separator + twitterUser.getId();

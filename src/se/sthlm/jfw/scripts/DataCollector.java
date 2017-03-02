@@ -10,6 +10,11 @@ import java.io.FilenameFilter;
 import java.io.ObjectOutputStream;
 import java.util.Map;
 
+import org.instagram4j.DefaultInstagramClient;
+import org.instagram4j.InstagramClient;
+import org.instagram4j.Result;
+
+import se.sthlm.jfw.mainServlet.data.SocialMediaUser;
 import twitter4j.IDs;
 import twitter4j.RateLimitStatus;
 import twitter4j.Twitter;
@@ -66,12 +71,76 @@ public class DataCollector {
 
     			o.close();
     			f.close();
+    			
+    			doInstagram();
     		}
     	} catch(Exception e) {
     		e.printStackTrace();
     	}
 	}
 	
+	private static void doInstagram() throws Exception {
+		String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
+		//String openshift_data_dir = ".";
+
+		String account_folder = openshift_data_dir + File.separator + "instagram";
+		File accountFolderFile = new File(account_folder);
+		
+		String[] directories = accountFolderFile.list(new FilenameFilter() {
+		  @Override
+		  public boolean accept(File current, String name) {
+		    return new File(current, name).isDirectory();
+		  }
+		});
+		
+		for(String directory : directories) {
+
+			String fullPath = account_folder + File.separator + directory;
+			InstagramClient instagramClient = getInstagram(fullPath);
+	    	Result<org.instagram4j.entity.User> result = instagramClient.getCurrentUser();
+	    	org.instagram4j.entity.User user = result.getData();
+			
+//			String followerFileName = fullPath + File.separator + "followers-" + System.currentTimeMillis() + ".txt";
+//			getAllAccountsFromAnAccount(twitter, followerFileName, twitter.getScreenName(), true);
+//			String friendsFileName = fullPath + File.separator + "friends-" + System.currentTimeMillis() + ".txt";
+//			getAllAccountsFromAnAccount(twitter, friendsFileName, twitter.getScreenName(), false);
+
+			String totalFollowerFileName = fullPath + File.separator + "followers.txt";
+			createFileIfItDoesNotExist(totalFollowerFileName);
+			BufferedWriter totalFollowerFile = new BufferedWriter(new FileWriter(totalFollowerFileName, true));
+			totalFollowerFile.write(user.getCounts().getFollowedBy() + "\n");
+			totalFollowerFile.close();
+			
+			String totalFriendsFileName = fullPath + File.separator + "friends.txt";
+			createFileIfItDoesNotExist(totalFriendsFileName);
+			BufferedWriter totalFriendsFile = new BufferedWriter(new FileWriter(totalFriendsFileName, true));
+			totalFriendsFile.write(user.getCounts().getFollows() + "\n");
+			totalFriendsFile.close();
+			
+			String userFileName = fullPath + File.separator + "user.instagram";
+			createFileIfItDoesNotExist(userFileName);
+			FileOutputStream f = new FileOutputStream(new File(userFileName));
+			ObjectOutputStream o = new ObjectOutputStream(f);
+			
+			SocialMediaUser socialMediaUser = new SocialMediaUser(user);
+			o.writeObject(socialMediaUser);
+
+			o.close();
+			f.close();	
+		}
+	}
+
+	private static InstagramClient getInstagram(String fullPath) throws Exception {
+		InstagramClient client = null;
+
+		BufferedReader input = new BufferedReader(new FileReader(fullPath + File.separator + "account.txt"));
+		String accessToken = input.readLine();
+		input.close();
+
+		client = new DefaultInstagramClient("21be52cec5e8428eb6a551cb83706709", "e5d3775698cc412984feea1820dce20c", accessToken);
+		return client;
+	}
+
 	private static Twitter getTwitter(String accountFolder) throws Exception {
 		BufferedReader input = new BufferedReader(new FileReader(accountFolder + File.separator + "account.txt"));
 		String oAuthConsumerKey = input.readLine();
