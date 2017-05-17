@@ -11,7 +11,13 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import twitter4j.IDs;
+
+import twitter4j.RateLimitStatus;
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
 import twitter4j.User;
@@ -19,6 +25,8 @@ import twitter4j.conf.ConfigurationBuilder;
 
 public class UserCollector {
 	public static void main(String[] args) {
+
+		String orderFile = "";
 		try {
 			
     		String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
@@ -38,20 +46,46 @@ public class UserCollector {
     		for(String directory : directories) {
     			String fullPath = account_folder + File.separator + directory;
     			Twitter twitter = getTwitter(fullPath);
-    			twitterList.add(twitter);
+    			
+    			boolean twitterAccountOK = false;
+    			try {
+    				twitter.verifyCredentials();
+    				twitter.getSuggestedUserCategories();
+    				twitterAccountOK = true;
+    				System.out.println(fullPath + " twitter is ok.");
+    			} catch(Exception e) {
+    				System.out.println(fullPath + " twitter is not ok.");
+    			}
+    			if(twitterAccountOK)
+    				twitterList.add(twitter);
     		}
     		
-    		for(String directory : directories) {
-    			String fullPath = account_folder + File.separator + directory;
-    			String latestFollowerFile = getLatestFollowerFile(fullPath);
-    			if(latestFollowerFile == null)
-    				continue;
-	    		String orderFile = latestFollowerFile.replace(".txt", ".csv");
+    		//for(String directory : directories) {
+    			//String fullPath = account_folder + File.separator + directory;
+    			//String latestFollowerFile = getLatestFollowerFile(fullPath);
+
+	    		String latestFollowerFile = openshift_data_dir + "mine-this-myflashstore.txt";
+	    		if(args.length > 0)
+	    			latestFollowerFile = args[0];
+//    			if(latestFollowerFile == null)
+//    				continue;
+	    		orderFile = latestFollowerFile.replace(".txt", ".csv");
 	    		createFileIfItDoesNotExist(orderFile);
-	    		BufferedReader orderInput = new BufferedReader(new FileReader(getLatestFollowerFile(fullPath)));
+	    		String counterFile = latestFollowerFile.replace(".txt", ".counter");
+	    		createFileIfItDoesNotExist(counterFile);
+//	    		BufferedReader orderInput = new BufferedReader(new FileReader(getLatestFollowerFile(fullPath)));
+	    		BufferedReader orderInput = new BufferedReader(new FileReader(latestFollowerFile));
+	    		
 	    		boolean continueLoop = true;
+	    		int counter = 0;
 	    		while(continueLoop) {
+	    		
 	    			for(Twitter aTwitter : twitterList) {
+	    				counter ++;
+	    				BufferedWriter userCounterOutput = new BufferedWriter(new FileWriter(counterFile, true));
+	    				userCounterOutput.write(counter + "\n");
+	    				userCounterOutput.close();
+	    				//System.out.println("Counter = " + counter);
 		    			String accountId = orderInput.readLine();
 		    			if(accountId == null) {
 		    				continueLoop = false;
@@ -65,27 +99,51 @@ public class UserCollector {
 		    				//e.printStackTrace();
 		    			}
 		    			if(twitterUser != null) {
-			    			BufferedWriter userOutput = new BufferedWriter(new FileWriter(orderFile, true));
-			    			
-			    			userOutput.write(cleanUpString(twitterUser.getName()) + ";" +
-			    					         "@" + cleanUpString(twitterUser.getScreenName()) + ";" + 
-			    					         cleanUpString(twitterUser.getURL()) + ";" +
-			    								   cleanUpString(twitterUser.getDescription()) + ";" +
-			    								   cleanUpString(twitterUser.getLocation()) + ";" +
-			    								   twitterUser.getFollowersCount() + ";" +
-			    								   twitterUser.getFriendsCount() + ";" +
-			    								   userIsActive(twitterUser) + ";" +
-			    			"\n");
+			    			//BufferedWriter userOutput = new BufferedWriter(new FileWriter(orderFile, true));
+		    			    Matcher m = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+").matcher(twitterUser.getDescription());
+
+			    			if(m.find()) {
+			    				String email = m.group();
+			    				String file = orderFile;
+			    				if((email.indexOf("..") != -1) || email.indexOf("-") != -1)
+			    					file = orderFile + ".extra";
+			    				BufferedWriter userOutput = new BufferedWriter(new FileWriter(file, true));
+			    				userOutput.write(m.group() + "\n");
+			    				//userOutput.write("Counter: " + counter + "\n");
+			    				userOutput.close();
+
+			    			}
+//			    			userOutput.write(cleanUpString(twitterUser.getName()) + ";" +
+//			    					         "@" + cleanUpString(twitterUser.getScreenName()) + ";" + 
+//			    					         cleanUpString(twitterUser.getURL()) + ";" +
+//			    								   cleanUpString(twitterUser.getDescription()) + ";" +
+//			    								   cleanUpString(twitterUser.getLocation()) + ";" +
+//			    								   twitterUser.getFollowersCount() + ";" +
+//			    								   twitterUser.getFriendsCount() + ";" +
+//			    								   userIsActive(twitterUser) + ";" +
+//			    			"\n");
 			    			// inactive/active, and each accounts bio, location, # followers,
-			    			userOutput.close();
+			    			
 		    			}
 	    			}
 	    			Thread.sleep(1000);
 	    		}
+	    		System.out.println("Counter = " + counter);
+				BufferedWriter userOutput = new BufferedWriter(new FileWriter(orderFile, true));
+				//userOutput.write(m.group() + "\n");
+				userOutput.write("Accounts processed: " + counter + "\n");
+				userOutput.close();
 	    		orderInput.close();
-    		}
+    		//}
 	    		
     	} catch(Exception e) {
+    		try {
+	    		BufferedWriter userOutput = new BufferedWriter(new FileWriter(orderFile, true));
+				userOutput.write("Exception caught: " + e.getMessage() + "\n");
+				userOutput.close();
+    		} catch(Exception ee) {
+    			//ignored
+    		}
     	}
 	}
 	
@@ -147,5 +205,61 @@ public class UserCollector {
 			file.createNewFile();
 		return true;
 	}
+	
+	public static void getAllFollowersFromAnAccount(Twitter twitter, String accountToGrow, String accountToGetFollowersFrom) {
+		try {
+			long cursor = -1;
+			IDs ids = null;
+			int followers = 0;
+			//focusattack
+			BufferedWriter newInput = new BufferedWriter(new FileWriter(accountToGrow + "-" + accountToGetFollowersFrom + ".txt"));
+			System.out.println("Listing followers's ids.");
+			do {
+
+				Map<String ,RateLimitStatus> rateLimitStatus = twitter.getRateLimitStatus();
+				RateLimitStatus status = rateLimitStatus.get("/followers/ids");
+				int remainingListLimit = status.getRemaining();
+				System.out.println("Reamining calls to list: " + remainingListLimit);
+
+				if(remainingListLimit > 0) {
+					ids = twitter.getFollowersIDs(accountToGetFollowersFrom, cursor);
+					for (long id : ids.getIDs()) {
+						//System.out.println(id);
+						///////////
+						//extra
+//											User user = twitter.showUser(id); 
+//											System.out.println("" + user.getDescription());
+//											System.out.println("" + user.getName());
+//											String banner = user.getProfileBannerURL();
+//											//System.out.println("url: " + url);
+//											if(banner != null) {
+//												//getWebImage(url, 100 + followers);
+//												//saveImage(banner, 100 + followers, "banners");
+//											}
+////											String profilePicture = user.getProfileImageURL();
+//											String profilePicture = user.getOriginalProfileImageURL();
+//
+//											//System.out.println("url: " + url);
+//											if(profilePicture != null) {
+//												//getWebImage(url, 100 + followers);
+//												saveImage(profilePicture, 100 + followers, "profilePictures");
+//											}
+						////////////
+						newInput.write(id + "\n");
+						followers ++;
+						//					if(followers > 200)
+						//						break;
+					}
+				}
+				System.out.println("Followers: " + followers);
+				Thread.sleep(60000);
+			} while ((cursor = ids.getNextCursor()) != 0);
+			newInput.close();
+		} catch (Exception e) {
+			System.out.println("Exception: " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
 
 }

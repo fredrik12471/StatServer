@@ -17,7 +17,8 @@
 <div class="background-header">
 <div class="header">
     <!-- div class="image"><img src="http://placehold.it/64x64"/></div -->
-    <div class="image"><img src="${actionBean.twitterUser.profileImageURL}"/></div>
+
+    <div class="image"><img src="${actionBean.twitterUser.profileImageURL}" border="6px solid white" /></div>
     <div class="text1">${actionBean.twitterUser.name} - @${actionBean.twitterUser.screenName}</div>
     <div class="text2">${actionBean.twitterUser.description}</div>
 </div>

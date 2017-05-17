@@ -29,6 +29,24 @@ public class DataCollector {
     		String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
     		//String openshift_data_dir = ".";
 
+    		String accountToMine = null;
+    		if(args.length > 0) {
+    			accountToMine = args[0];
+    			ConfigurationBuilder cb = new ConfigurationBuilder();
+    			cb.setDebugEnabled(true)
+
+    			//TinyHouseSale
+    			.setOAuthConsumerKey("c6oK4XyCSMIwMb9am8g10938B")
+    			.setOAuthConsumerSecret("yVM8gD4AyZxVh29IMYSsPnBPxJsh9VpQhyByxQBl559XpntqHc")
+    			.setOAuthAccessToken("843873429925347330-XQFDx07Z0kJJOpR92ij0Uq7l7bJx6FC")
+    			.setOAuthAccessTokenSecret("3SU1tMMNlXn5427auLVwtlWOHlw9dvsgJEwnA0AOuFuxU");
+
+				TwitterFactory tf = new TwitterFactory(cb.build());
+				Twitter twitter = tf.getInstance();
+				getAllAccountsFromAnAccount(twitter, openshift_data_dir + File.separator + accountToMine + "followers.txt", accountToMine, true);
+				return;
+    		}
+    		
     		String account_folder = openshift_data_dir + File.separator + "twitter";
     		File accountFolderFile = new File(account_folder);
     		//File file = new File("/path/to/directory");
@@ -43,37 +61,48 @@ public class DataCollector {
 
     			String fullPath = account_folder + File.separator + directory;
     			Twitter twitter = getTwitter(fullPath);
-    			String followerFileName = fullPath + File.separator + "followers-" + System.currentTimeMillis() + ".txt";
-    			getAllAccountsFromAnAccount(twitter, followerFileName, twitter.getScreenName(), true);
-    			String friendsFileName = fullPath + File.separator + "friends-" + System.currentTimeMillis() + ".txt";
-    			getAllAccountsFromAnAccount(twitter, friendsFileName, twitter.getScreenName(), false);
-
-    			String totalFollowerFileName = fullPath + File.separator + "followers.txt";
-    			createFileIfItDoesNotExist(totalFollowerFileName);
-    			BufferedWriter totalFollowerFile = new BufferedWriter(new FileWriter(totalFollowerFileName, true));
-    			totalFollowerFile.write(twitter.showUser(twitter.getId()).getFollowersCount() + "\n");
-    			totalFollowerFile.close();
     			
-    			String totalFriendsFileName = fullPath + File.separator + "friends.txt";
-    			createFileIfItDoesNotExist(totalFriendsFileName);
-    			BufferedWriter totalFriendsFile = new BufferedWriter(new FileWriter(totalFriendsFileName, true));
-    			totalFriendsFile.write(twitter.showUser(twitter.getId()).getFriendsCount() + "\n");
-    			totalFriendsFile.close();
-    			
-    			String userFileName = fullPath + File.separator + "user.twitter";
-    			createFileIfItDoesNotExist(userFileName);
-    			FileOutputStream f = new FileOutputStream(new File(userFileName));
-    			ObjectOutputStream o = new ObjectOutputStream(f);
+    			boolean twitterAccountOK = false;
+    			try {
+    				twitter.verifyCredentials();
+    				twitter.getSuggestedUserCategories();
+    				twitterAccountOK = true;
+    				System.out.println(fullPath + " twitter is ok.");
+    			} catch(Exception e) {
+    				System.out.println(fullPath + " twitter is not ok.");
+    			}
+    			if(twitterAccountOK) {
+        			String followerFileName = fullPath + File.separator + "followers-" + System.currentTimeMillis() + ".txt";
+        			getAllAccountsFromAnAccount(twitter, followerFileName, twitter.getScreenName(), true);
+        			String friendsFileName = fullPath + File.separator + "friends-" + System.currentTimeMillis() + ".txt";
+        			getAllAccountsFromAnAccount(twitter, friendsFileName, twitter.getScreenName(), false);
 
-    			// Write objects to file
-    			User user = twitter.verifyCredentials();
-    			o.writeObject(user);
+        			String totalFollowerFileName = fullPath + File.separator + "followers.txt";
+        			createFileIfItDoesNotExist(totalFollowerFileName);
+        			BufferedWriter totalFollowerFile = new BufferedWriter(new FileWriter(totalFollowerFileName, true));
+        			totalFollowerFile.write(twitter.showUser(twitter.getId()).getFollowersCount() + "\n");
+        			totalFollowerFile.close();
+        			
+        			String totalFriendsFileName = fullPath + File.separator + "friends.txt";
+        			createFileIfItDoesNotExist(totalFriendsFileName);
+        			BufferedWriter totalFriendsFile = new BufferedWriter(new FileWriter(totalFriendsFileName, true));
+        			totalFriendsFile.write(twitter.showUser(twitter.getId()).getFriendsCount() + "\n");
+        			totalFriendsFile.close();
+        			
+        			String userFileName = fullPath + File.separator + "user.twitter";
+        			createFileIfItDoesNotExist(userFileName);
+        			FileOutputStream f = new FileOutputStream(new File(userFileName));
+        			ObjectOutputStream o = new ObjectOutputStream(f);
 
-    			o.close();
-    			f.close();
-    			
-    			doInstagram();
+        			// Write objects to file
+        			User user = twitter.verifyCredentials();
+        			o.writeObject(user);
+
+        			o.close();
+        			f.close();  				
+    			}
     		}
+			doInstagram();
     	} catch(Exception e) {
     		e.printStackTrace();
     	}

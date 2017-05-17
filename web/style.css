@@ -107,25 +107,33 @@ div.description {
     height: 55px;
   	width: 600px;
  	margin: 0 auto;
+ 	border:2px solid green;
 }
 
 .header .image {
 
     width: 180px;
     height: 80px;
-    //border:2px solid green;
+/*     border:2px solid green; */
 	position:relative;
 	float:left;
+		border-radius: 25px;
 }
 
-.header .image img {
 
-position:absolute;
-bottom:0px;
-right:0px;
-height: 64;
-width: 64;
+/* .header .image img { */
+/* position:absolute; */
+/* bottom:0px; */
+/* right:0px; */
+/* height: 60px; */
+/* width: 60px; */
+/* border: 10px double red; */
+/* } */
+
+img {
+	border-radius: 25px;
 }
+
 .header .text1 {
     font: Tahoma;
     /*border:2px solid blue;*/
