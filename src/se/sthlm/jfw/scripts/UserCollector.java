@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import twitter4j.IDs;
 
 import twitter4j.RateLimitStatus;
@@ -24,6 +27,10 @@ import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class UserCollector {
+	
+	public static Logger logger = LogManager.getRootLogger();
+	
+	
 	public static void main(String[] args) {
 
 		String orderFile = "";
@@ -71,8 +78,8 @@ public class UserCollector {
 //    				continue;
 	    		orderFile = latestFollowerFile.replace(".txt", ".csv");
 	    		createFileIfItDoesNotExist(orderFile);
-	    		String counterFile = latestFollowerFile.replace(".txt", ".counter");
-	    		createFileIfItDoesNotExist(counterFile);
+//	    		String counterFile = latestFollowerFile.replace(".txt", ".counter");
+//	    		createFileIfItDoesNotExist(counterFile);
 //	    		BufferedReader orderInput = new BufferedReader(new FileReader(getLatestFollowerFile(fullPath)));
 	    		BufferedReader orderInput = new BufferedReader(new FileReader(latestFollowerFile));
 	    		
@@ -80,11 +87,12 @@ public class UserCollector {
 	    		int counter = 0;
 	    		while(continueLoop) {
 	    		
+	    			Long startTime = System.currentTimeMillis();
 	    			for(Twitter aTwitter : twitterList) {
 	    				counter ++;
-	    				BufferedWriter userCounterOutput = new BufferedWriter(new FileWriter(counterFile, true));
-	    				userCounterOutput.write(counter + "\n");
-	    				userCounterOutput.close();
+//	    				BufferedWriter userCounterOutput = new BufferedWriter(new FileWriter(counterFile, true));
+//	    				userCounterOutput.write(counter + "\n");
+//	    				userCounterOutput.close();
 	    				//System.out.println("Counter = " + counter);
 		    			String accountId = orderInput.readLine();
 		    			if(accountId == null) {
@@ -97,6 +105,7 @@ public class UserCollector {
 		    			} catch(Exception e) {
 		    				//Ignored for now, users may have been suspended
 		    				//e.printStackTrace();
+		    				logger.error("Something wrong with user " + accountId + ", at count " + counter + ": " + e.getMessage());
 		    			}
 		    			if(twitterUser != null) {
 			    			//BufferedWriter userOutput = new BufferedWriter(new FileWriter(orderFile, true));
@@ -125,10 +134,24 @@ public class UserCollector {
 			    			// inactive/active, and each accounts bio, location, # followers,
 			    			
 		    			}
+		    			if(counter % 1000 == 0)
+		    				logger.info("Accounts processed: " + counter);
+		    			//Thread.sleep(100);
 	    			}
-	    			Thread.sleep(1000);
+	    			Long stopTime = System.currentTimeMillis();
+	    			Long sleepTime = 1000 - (stopTime - startTime);
+	    			
+	    			if(counter % 100 == 0)
+	    				logger.info("Sleep time: " + sleepTime);
+	    			if(sleepTime > 0) {
+	    				logger.info("Sleeping: " + sleepTime);
+	    				Thread.sleep(sleepTime + 100);
+	    			}
 	    		}
-	    		System.out.println("Counter = " + counter);
+	    		
+	    		logger.info("Accounts processed: " + counter);
+//	    		System.out.println("Counter = " + counter);
+	    		
 				BufferedWriter userOutput = new BufferedWriter(new FileWriter(orderFile, true));
 				//userOutput.write(m.group() + "\n");
 				userOutput.write("Accounts processed: " + counter + "\n");
@@ -137,13 +160,14 @@ public class UserCollector {
     		//}
 	    		
     	} catch(Exception e) {
-    		try {
-	    		BufferedWriter userOutput = new BufferedWriter(new FileWriter(orderFile, true));
-				userOutput.write("Exception caught: " + e.getMessage() + "\n");
-				userOutput.close();
-    		} catch(Exception ee) {
-    			//ignored
-    		}
+    		logger.error("Exception: " + e.getMessage());
+//    		try {
+//	    		BufferedWriter userOutput = new BufferedWriter(new FileWriter(orderFile, true));
+//				userOutput.write("Exception caught: " + e.getMessage() + "\n");
+//				userOutput.close();
+//    		} catch(Exception ee) {
+//    			//ignored
+//    		}
     	}
 	}
 	

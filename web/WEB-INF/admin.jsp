@@ -7,7 +7,7 @@
 <html>
 <head>
 <title>Scomer Service</title>
-<link href="style.css" rel="stylesheet" type="text/css">
+<link href="/gridstyle.css" rel="stylesheet" type="text/css">
 
 </head>
 <body>
@@ -34,7 +34,14 @@
 			</tr>
 		</c:forEach>
 	</table>
-	
+<div class="wrapper">
+  <div class="box a">
+    <div class="box e"><img src="http://placehold.it/64x64"/></div>
+    <div class="box f">Fredrik W - @fwsthlm</div>
+    <div class="box g">vin och reker, gnaget leker.</div>
+  </div>  
+  <div class="box b">B</div>
+</div>
 </body>
 </html>
 

@@ -10,6 +10,8 @@ import java.io.FilenameFilter;
 import java.io.ObjectOutputStream;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.instagram4j.DefaultInstagramClient;
 import org.instagram4j.InstagramClient;
 import org.instagram4j.Result;
@@ -24,6 +26,8 @@ import twitter4j.conf.ConfigurationBuilder;
 
 public class DataCollector {
 
+	public static Logger logger = LogManager.getRootLogger();
+	
 	public static void main(String[] args) {
 		try {
     		String openshift_data_dir = System.getenv().get("OPENSHIFT_DATA_DIR");
@@ -217,6 +221,7 @@ public class DataCollector {
 					}
 				}
 				System.out.println("Accounts: " + followers);
+				logger.info("Got accounts: " + followers);
 				doItAgain = (cursor = ids.getNextCursor()) != 0;
 				if(doItAgain)
 					Thread.sleep(60000);
@@ -225,6 +230,7 @@ public class DataCollector {
 		} catch (Exception e) {
 			System.out.println("Exception: " + e.getMessage());
 			e.printStackTrace();
+			logger.error("Exception: " + e.getMessage());
 		}
 	}
 	
